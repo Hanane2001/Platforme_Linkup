@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use App\Models\FriendRequest;
 
 class User extends Authenticatable
 {
@@ -47,5 +49,26 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function sentFriendRequests(){
+        return $this->hasMany(FriendRequest::class, 'sender_id');
+    }
+
+    public function receiveFriendRequests(){
+        return $this->hasMany(FriendRequest::class, 'receiver_id');
+    }
+
+    public function friends(){
+        return User::whereIn('id', function ($query) {
+            $query->select('receiver_id')
+                ->from('friend_requests')
+                ->where('sender_id', auth()->id())
+                ->where('status', 'accepted')
+                ->union(DB::table('friend_requests')
+                        ->select('sender_id')
+                        ->where('receiver_id', auth()->id())
+                        ->where('status', 'accepted'));
+        })->get();
     }
 }

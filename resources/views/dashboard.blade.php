@@ -91,7 +91,7 @@
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                                         <div class="text-center p-3 bg-[#F8F9FA] dark:bg-[#1C1C1B] rounded-lg">
                                             <div class="text-2xl font-bold text-[#1b1b18] dark:text-white">
-                                                {{ auth()->user()->friends_count ?? 0 }}
+                                                {{ auth()->user()->friends()->count()}}
                                             </div>
                                             <div class="text-sm text-[#706f6c] dark:text-[#A1A09A]">Amis</div>
                                         </div>
@@ -194,9 +194,15 @@
                                                             {{ $user->email }}
                                                         </div>
                                                     </div>
-                                                    <a href="#" class="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors">
-                                                        Voir
-                                                    </a>
+                                                    @if($user->id !== auth()->id())
+                                                        <form method="POST" action="{{ route('friends.send', $user->id) }}">
+                                                            @csrf
+                                                            <button
+                                                                class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200">
+                                                                Ajouter en ami
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                             @if($users->count() > 3)
@@ -281,6 +287,71 @@
                             </div>
                         </div>
                     </div>
+
+                    @if(auth()->user()->receiveFriendRequests->where('status','pending')->count())
+                        <div class="bg-white dark:bg-[#161615] rounded-xl shadow p-6 text-white">
+                                <h3 class="text-lg font-semibold mb-4"> Demandes d’amis</h3>
+
+                                <div class="space-y-3">
+                                    @foreach(auth()->user()->receiveFriendRequests->where('status','pending') as $request)
+                                        <div class="flex items-center justify-between p-3 bg-[#F8F9FA] dark:bg-[#1C1C1B] rounded-lg">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center">
+                                                    {{ substr($request->sender->name, 0, 1) }}
+                                                </div>
+                                                <span class="font-medium">
+                                                    {{ $request->sender->name }}
+                                                </span>
+                                            </div>
+
+                                            <div class="flex gap-2">
+                                                <form method="POST" action="{{ route('friends.accept', $request->id) }}">
+                                                    @csrf
+                                                    <button class="px-2 py-1 text-sm bg-green-100 text-green-700 rounded">
+                                                        Accepter
+                                                    </button>
+                                                </form>
+
+                                                <form method="POST" action="{{ route('friends.reject', $request->id) }}">
+                                                    @csrf
+                                                    <button class="px-2 py-1 text-sm bg-red-100 text-red-700 rounded">
+                                                        Refuser
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                    @if(auth()->user()->friends()->count())
+                        <div class="bg-white dark:bg-[#161615] rounded-xl shadow p-6 text-white overflow-y-auto">
+                            <h3 class="text-lg font-semibold mb-4">👥 Mes amis ({{ auth()->user()->friends()->count() }})</h3>
+
+                            <div class="space-y-3">
+                                @foreach(auth()->user()->friends() as $friend)
+                                    <div class="flex items-center gap-3 p-3 bg-[#F8F9FA] dark:bg-[#1C1C1B] rounded-lg">
+                                        <div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-blue-500 text-white">
+                                            @if($friend->profile_photo)
+                                                <img src="{{ asset('storage/' . $friend->profile_photo) }}" class="w-full h-full object-cover">
+                                            @else
+                                                {{ strtoupper(substr($friend->name, 0, 1)) }}
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-[#1b1b18] dark:text-white">
+                                                {{ $friend->name }}
+                                            </p>
+                                            @if($friend->pseudo)
+                                                <p class="text-sm text-blue-500">{{ $friend->pseudo }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Progression du profil -->
                     <div class="bg-white dark:bg-[#161615] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.08)] dark:shadow-[inset_0px_0px_0px_1px_#3E3E3A] rounded-xl overflow-hidden">
