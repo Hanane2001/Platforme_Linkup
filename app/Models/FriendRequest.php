@@ -36,6 +36,7 @@ class FriendRequest extends Model
 
     public function reject(): void
     {
-        $this->update(['status' => 'rejected']);
+        // $this->update(['status' => 'rejected']); ou 
+        $this->delete();
     }
 }

@@ -59,16 +59,49 @@ class User extends Authenticatable
         return $this->hasMany(FriendRequest::class, 'receiver_id');
     }
 
-    public function friends(){
-        return User::whereIn('id', function ($query) {
+    public function friendsRelation(){
+        $userId = $this->id;
+        return User::whereIn('id', function ($query) use ($userId) {
             $query->select('receiver_id')
                 ->from('friend_requests')
-                ->where('sender_id', auth()->id())
+                ->where('sender_id', $userId)
                 ->where('status', 'accepted')
-                ->union(DB::table('friend_requests')
+                ->union(
+                    DB::table('friend_requests')
                         ->select('sender_id')
-                        ->where('receiver_id', auth()->id())
-                        ->where('status', 'accepted'));
-        })->get();
+                        ->where('receiver_id', $userId)
+                        ->where('status', 'accepted')
+                );
+        });
+    }
+    public function friends(){
+        return $this->friendsRelation()->get();
+    }
+
+    public function isFriendWith(User $user){
+        return $this->friendsRelation()->where('id', $user->id)->exists();
+    }
+
+    public function hasPendingRequestTo(User $user){
+        return FriendRequest::where('sender_id', $this->id)
+            ->where('receiver_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+    public function sendFriendRequestTo(User $user): void{
+        if ($this->id === $user->id) return;
+
+        FriendRequest::firstOrCreate(['sender_id' => $this->id, 'receiver_id' => $user->id,], ['status' => 'pending']);
+    }
+
+    public function removeFriend(User $user): void{
+        FriendRequest::where(function ($q) use ($user) {
+            $q->where('sender_id', $this->id)
+            ->where('receiver_id', $user->id);
+        })->orWhere(function ($q) use ($user) {
+            $q->where('sender_id', $user->id)
+            ->where('receiver_id', $this->id);
+        })->where('status', 'accepted')->delete();
     }
 }

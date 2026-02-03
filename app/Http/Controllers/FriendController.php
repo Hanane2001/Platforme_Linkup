@@ -4,34 +4,37 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FriendRequest;
+use App\Models\User;
 
 class FriendController extends Controller
 {
-    public function send($id){
-        if($id == auth()->id()){
-            return back();
-        }
-        $exists = FriendRequest::where(function ($q) use ($id){
-            $q->where('sender_id', auth()->id())->where('receiver_id', $id);
-        })->orwhere(function ($q) use($id){
-            $q->where('sender_id', $id)->where('receiver_id', auth()->id());
-        })->exists();
-        if($exists){
-            return back();
-        }
-        FriendRequest::create(['sender_id' => auth()->id(), 'receiver_id' => $id, 'status' => 'pending']);
+    public function send(User $user){
+        auth()->user()->sendFriendRequestTo($user);
         return back();
     }
 
-    public function accept($id){
-        $friendRequest = FriendRequest::where('id', $id)->where('receiver_id', auth()->id())->firstOrFail();
+    public function accept(FriendRequest $friendRequest){
+        if ($friendRequest->receiver_id !== auth()->id()) {
+            abort(403);
+        }
         $friendRequest->accept();
-        return back();
+        return back()->with('success', 'Demande acceptée');
     }
 
-    public function reject($id){
-        $friendRequest = FriendRequest::where('id', $id)->where('reciever_id', auth()->id())->firstOrFail();
+    public function reject(FriendRequest $friendRequest){
+        if ($friendRequest->receiver_id !== auth()->id()) {
+            abort(403);
+        }
         $friendRequest->reject();
-        return back();
+        return back()->with('success', 'Demande refusée');
+    }
+
+    public function remove(User $user){
+        $authUser = auth()->user();
+        if (! $authUser->isFriendWith($user)) {
+            return redirect()->route('dashboard')->with('error', 'Vous n’êtes pas amis.');
+        }
+        $authUser->removeFriend($user);
+        return redirect()->route('dashboard')->with('success', 'Ami supprimé avec succès.');
     }
 }
