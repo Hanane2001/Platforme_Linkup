@@ -68,23 +68,6 @@
                                                 @endif
                                             </p>
                                         </div>
-                                        <div class="mt-4 md:mt-0">
-                                            @if(auth()->user()->email_verified_at)
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    Email vérifié
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.07 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                                                    </svg>
-                                                    Email non vérifié
-                                                </span>
-                                            @endif
-                                        </div>
                                     </div>
 
                                     <!-- Statistiques rapides -->
@@ -116,7 +99,12 @@
                             </div>
                         </div>
                     </div>
-
+                    @include('posts._create')
+                    <div class="space-y-4">
+                        @foreach(auth()->user()->posts()->latest()->get() as $post)
+                            @include('posts._post', ['post' => $post])
+                        @endforeach
+                    </div>
                     <!-- Recherche rapide -->
                     <div class="bg-white dark:bg-[#161615] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.08)] dark:shadow-[inset_0px_0px_0px_1px_#3E3E3A] rounded-xl overflow-hidden">
                         <div class="p-6">
@@ -247,26 +235,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                     </svg>
                                 </a>
-                                @if(!auth()->user()->email_verified_at)
-                                    <form method="POST" action="{{ route('verification.send') }}" class="group">
-                                        @csrf
-                                        <button type="submit" class="w-full flex items-center p-3 hover:bg-[#F8F9FA] dark:hover:bg-[#1C1C1B] rounded-lg transition-colors">
-                                            <div class="w-10 h-10 flex items-center justify-center bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-lg mr-3 group-hover:scale-110 transition-transform">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                                </svg>
-                                            </div>
-                                            <div class="flex-1 text-left">
-                                                <div class="font-medium text-[#1b1b18] dark:text-white">Vérifier l'email</div>
-                                                <div class="text-sm text-[#706f6c] dark:text-[#A1A09A]">Recevoir un nouveau lien</div>
-                                            </div>
-                                            <svg class="w-5 h-5 text-[#706f6c] dark:text-[#A1A09A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                @endif
-
                                 <!-- Lien pour voir tous les utilisateurs (si vous avez cette route) -->
                                 @if(Route::has('users.index'))
                                     <a href="{{ route('users.index') }}" class="flex items-center p-3 hover:bg-[#F8F9FA] dark:hover:bg-[#1C1C1B] rounded-lg transition-colors group">
@@ -365,14 +333,13 @@
                             <div class="space-y-4">
                                 @php
                                     $completion = 0;
-                                    $totalItems = 5;
+                                    $totalItems = 4;
                                     
                                     // Calcul du pourcentage de complétion
-                                    if(auth()->user()->email_verified_at) $completion += 20;
                                     if(auth()->user()->profile_photo) $completion += 20;
                                     if(auth()->user()->bio) $completion += 20;
                                     if(auth()->user()->pseudo) $completion += 20;
-                                    if(auth()->user()->name && auth()->user()->email) $completion += 20;
+                                    if(auth()->user()->name && auth()->user()->email) $completion += 40;
                                 @endphp
                                 
                                 <div>
@@ -388,7 +355,6 @@
                                 <div class="space-y-2">
                                     @php
                                         $profileItems = [
-                                            ['completed' => auth()->user()->email_verified_at, 'label' => 'Email vérifié'],
                                             ['completed' => auth()->user()->profile_photo, 'label' => 'Photo de profil'],
                                             ['completed' => auth()->user()->bio, 'label' => 'Bio complétée'],
                                             ['completed' => auth()->user()->pseudo, 'label' => 'Pseudo défini'],

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FriendController;
 use App\Http\controllers\UserController;
+use App\Http\controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +28,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('/messages/{user}/create', [MessageController::class, 'create'])->name('messages.create');
+
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
 require __DIR__.'/auth.php';

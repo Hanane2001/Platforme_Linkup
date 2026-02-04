@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use App\Models\FriendRequest;
+use App\Models\Post;
 
 class User extends Authenticatable
 {
@@ -103,5 +104,9 @@ class User extends Authenticatable
             $q->where('sender_id', $user->id)
             ->where('receiver_id', $this->id);
         })->where('status', 'accepted')->delete();
+    }
+
+    public function posts(){
+        return $this->hasMany(Post::class);
     }
 }
