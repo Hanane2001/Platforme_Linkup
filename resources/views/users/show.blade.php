@@ -293,6 +293,40 @@
                                     </div>
                                     @endif
                                 </div>
+
+                                <!-- Comments -->
+                                <div class="mt-4 space-y-3">
+                                    @foreach($post->comments as $comment)
+                                        <div class="flex gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">
+                                                @if($user->profile_photo)
+                                                    <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                                                @else
+                                                    <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                                        <span class="text-3xl font-bold text-white">
+                                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <div class="bg-gray-100 dark:bg-[#161615] rounded-lg px-4 py-2 flex-1">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        {{ $comment->user->name }}
+                                                    </span>
+                                                    <span class="text-xs text-gray-500">
+                                                        {{ $comment->created_at->diffForHumans() }}
+                                                    </span>
+                                                </div>
+
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                                    {{ $comment->content }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                                 
                                 <!-- Interactions -->
                                 <div class="flex items-center gap-4 pt-3 border-t border-gray-100 dark:border-gray-800">
@@ -314,14 +348,23 @@
                                             </button>
                                         </form>
                                     @endif
-
                                     
-                                    <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                        </svg>
-                                        <span class="text-sm">Commenter</span>
-                                    </button>
+                                    <form action="{{ route('comments.store', $post) }}" method="POST" class="mt-3">
+                                        @csrf
+                                        <div class="flex gap-2">
+                                            <input
+                                                type="text"
+                                                name="content"
+                                                placeholder="Écrire un commentaire..."
+                                                class="flex-1 rounded-lg px-3 text-white py-2 text-sm bg-gray-50 dark:bg-[#1C1C1B] border border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-blue-500"
+                                                required
+                                            >
+                                            <button type="submit"
+                                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm">
+                                                Envoyer
+                                            </button>
+                                        </div>
+                                    </form>
                                     
                                     <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

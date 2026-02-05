@@ -76,6 +76,29 @@
             </button>
         </div>
 
+        <div class="mt-4 border-t pt-4 space-y-3">
+            <form action="{{ route('comments.store', $post) }}" method="POST" class="flex gap-2">
+                @csrf
+                <input
+                    type="text"
+                    name="content"
+                    placeholder="Écrire un commentaire..."
+                    class="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#1C1C1B] text-sm text-gray-900 dark:text-white focus:outline-none"
+                >
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
+                    Publier
+                </button>
+            </form>
+
+            {{-- List comments --}}
+            @foreach($post->comments as $comment)
+                <div class="text-sm text-gray-700 dark:text-gray-300">
+                    <strong>{{ $comment->user->name }}</strong> :
+                    {{ $comment->content }}
+                </div>
+            @endforeach
+        </div>
+
         <!-- Bouton supprimer -->
         @if($post->user_id === auth()->id())
             <form action="{{ route('posts.destroy', $post) }}" method="POST" 

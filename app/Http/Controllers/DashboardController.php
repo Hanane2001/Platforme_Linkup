@@ -5,17 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Models\Like;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
-    {
+    public function index(Request $request){
         $users = null;
-
         if ($request->filled('search')) {
             $search = $request->search;
-
             $users = User::where('id', '!=', auth()->id())
                 ->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -25,7 +21,7 @@ class DashboardController extends Controller
                 ->get();
         }
         // $posts = Post::latest()->get();
-        $posts = Post::with(['user', 'likes'])
+        $posts = Post::with(['user', 'likes', 'comments.user'])
             ->latest()
             ->get();
         return view('dashboard', compact('users','posts'));
