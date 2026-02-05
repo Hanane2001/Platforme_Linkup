@@ -90,9 +90,9 @@
                                         </div>
                                         <div class="text-center p-3 bg-[#F8F9FA] dark:bg-[#1C1C1B] rounded-lg">
                                             <div class="text-2xl font-bold text-[#1b1b18] dark:text-white">
-                                                #{{ auth()->user()->id }}
+                                                {{ auth()->user()->posts()->count() }}
                                             </div>
-                                            <div class="text-sm text-[#706f6c] dark:text-[#A1A09A]">ID Membre</div>
+                                            <div class="text-sm text-[#706f6c] dark:text-[#A1A09A]">Posts</div>
                                         </div>
                                     </div>
                                 </div>
@@ -101,7 +101,7 @@
                     </div>
                     @include('posts._create')
                     <div class="space-y-4">
-                        @foreach(auth()->user()->posts()->latest()->get() as $post)
+                        @foreach($posts as $post)
                             @include('posts._post', ['post' => $post])
                         @endforeach
                     </div>

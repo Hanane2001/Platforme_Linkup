@@ -184,22 +184,6 @@
                                                 <span class="text-sm text-gray-600 dark:text-gray-400">Ajouter une photo</span>
                                             </div>
                                         </label>
-                                        
-                                        <!-- Prévisualisation -->
-                                        <div x-show="preview" 
-                                             x-transition
-                                             class="mt-2 relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
-                                            <img :src="preview" 
-                                                 alt="Preview" 
-                                                 class="w-full h-32 object-cover">
-                                            <button type="button"
-                                                    @click="preview = null; $refs.fileInput.value = ''"
-                                                    class="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
                                     </div>
                                     
                                     <button type="submit"
@@ -312,12 +296,25 @@
                                 
                                 <!-- Interactions -->
                                 <div class="flex items-center gap-4 pt-3 border-t border-gray-100 dark:border-gray-800">
-                                    <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
-                                        </svg>
-                                        <span class="text-sm">J'aime</span>
-                                    </button>
+                                    @if($post->isLikedBy(auth()->user()))
+                                        <form action="{{ route('likes.destroy', $post) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                                ❤️
+                                                <span>{{ $post->likes->count() }}</span>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('likes.store', $post) }}" method="POST">
+                                            @csrf
+                                            <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                                                🤍
+                                                <span>{{ $post->likes->count() }}</span>
+                                            </button>
+                                        </form>
+                                    @endif
+
                                     
                                     <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-// use App\Models\Like;
+use App\Models\Like;
 // use App\Models\Comment;
 
 class Post extends Model
@@ -15,9 +15,21 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
-    // public function likes(){
-    //     return $this->hasMany(Like::class);
-    // }
+    public function likes(){
+        return $this->hasMany(Like::class);
+    }
+
+    public function isLikedBy(User $user = null){
+        if (!$user) {
+            $user = auth()->user();
+        }
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 
     // public function comments(){
     //     return $this->hasMany(Comment::class);

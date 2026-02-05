@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\Like;
 
 class DashboardController extends Controller
 {
@@ -23,7 +24,10 @@ class DashboardController extends Controller
                 })
                 ->get();
         }
-        $posts = Post::latest()->get();
+        // $posts = Post::latest()->get();
+        $posts = Post::with(['user', 'likes'])
+            ->latest()
+            ->get();
         return view('dashboard', compact('users','posts'));
     }
 }

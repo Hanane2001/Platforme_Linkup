@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FriendController;
 use App\Http\controllers\UserController;
 use App\Http\controllers\PostController;
+use App\Http\controllers\LikeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +32,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store');
+    Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('likes.destroy');
 });
 
 require __DIR__.'/auth.php';
