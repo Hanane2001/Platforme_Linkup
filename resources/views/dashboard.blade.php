@@ -126,10 +126,16 @@
                                                         <div class="text-sm text-[#706f6c] dark:text-[#A1A09A]">{{ $user->email }}</div>
                                                     </div>
                                                     @if($user->id !== auth()->id())
-                                                        <form method="POST" action="{{ route('friends.send', $user) }}">
-                                                            @csrf
-                                                            <button class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200">Ajouter en ami</button>
-                                                        </form>
+                                                        @if(auth()->user()->isFriendWith($user))
+                                                            <span class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg">Ami ✓</span>
+                                                        @elseif(auth()->user()->hasPendingRequestTo($user))
+                                                            <span class="px-3 py-1 text-sm bg-gray-200 text-gray-600 rounded-lg cursor-not-allowed">En attente ⏳</span>
+                                                        @else
+                                                            <form method="POST" action="{{ route('friends.send', $user) }}">
+                                                                @csrf
+                                                                <button class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200">Ajouter en ami</button>
+                                                            </form>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             @endforeach
