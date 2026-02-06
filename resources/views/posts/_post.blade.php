@@ -1,63 +1,66 @@
-<div class="bg-white dark:bg-[#161615] rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-800 hover:shadow-xl transition-all duration-300">
-    <div class="relative">
-        <div class="flex items-start gap-3 mb-4">
-            <div class="relative w-15 h-15 rounded-full overflow-hidden ring-4 ring-white dark:ring-[#161615]">
+<div x-data="{ showComments: false }" class="bg-white dark:bg-[#161615] rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition overflow-hidden">
+    <div class="p-4 flex justify-between items-start">
+        <div class="flex gap-3">
+            <div class="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
                 @if($post->user->profile_photo)
-                    <img src="{{ asset('storage/' . $post->user->profile_photo) }}" alt="{{ $post->user->name }}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <img src="{{ asset('storage/' . $post->user->profile_photo) }}" class="w-full h-full object-cover">
                 @else
-                    <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center"><span class="text-3xl font-bold text-white">{{ strtoupper(substr($post->user->name, 0, 1)) }}</span></div>
+                    {{ strtoupper(substr($post->user->name, 0, 1)) }}
                 @endif
             </div>
-            <div class="flex-1">
+            <div>
                 <div class="flex items-center gap-2">
-                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ $post->user->name ?? 'Utilisateur' }}</h4>
-                    <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-400">{{ $post->created_at->diffForHumans() }}</span>
+                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ $post->user->name }}</h4>
+                    <span class="text-xs text-gray-400">• {{ $post->created_at->diffForHumans() }}</span>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Publié</p>
+                <p class="text-xs text-indigo-500">Membre LinkUp</p>
             </div>
         </div>
-        <p class="text-[#1b1b18] dark:text-gray-200 text-lg leading-relaxed pl-13">{{ $post->description }}</p>
-        @if($post->post_photo)
-            <div class="mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800"><img src="{{ asset('storage/' . $post->post_photo) }}" alt="Post image" class="w-full h-auto max-h-96 object-cover"></div>
+        @if($post->user_id === auth()->id())
+            <form action="{{ route('posts.destroy', $post) }}" method="POST">
+                @csrf @method('DELETE')
+                <button class="text-gray-400 hover:text-red-500">🗑</button>
+            </form>
         @endif
     </div>
-    <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-        <div class="flex items-center gap-4">
+    <div class="px-4 pb-4">
+        <p class="text-gray-800 dark:text-gray-200 text-[15px] mb-3">{{ $post->description }}</p>
+        @if($post->post_photo)
+            <img src="{{ asset('storage/' . $post->post_photo) }}" class="rounded-xl w-full max-h-[450px] object-cover">
+        @endif
+    </div>
+    <div class="px-4 py-2 flex border-t border-gray-100 dark:border-gray-800">
+        <div class="flex-1">
             @if($post->isLikedBy(auth()->user()))
                 <form action="{{ route('likes.destroy', $post) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button class="flex items-center gap-2 text-blue-600 dark:text-blue-400">❤️<span>{{ $post->likes->count() }}</span></button>
+                    @csrf @method('DELETE')
+                    <button class="w-full py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg">❤️ J’aime</button>
                 </form>
             @else
                 <form action="{{ route('likes.store', $post) }}" method="POST">
                     @csrf
-                    <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600">🤍<span>{{ $post->likes->count() }}</span></button>
+                    <button class="w-full py-2 text-gray-600 font-semibold hover:bg-gray-100 rounded-lg">🤍 J’aime</button>
                 </form>
             @endif
-            <button class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                <span class="text-sm">Commenter</span>
-            </button>
         </div>
-        <div class="mt-4 border-t pt-4 space-y-3">
-            <form action="{{ route('comments.store', $post) }}" method="POST" class="flex gap-2">
-                @csrf
-                <input type="text" name="content" placeholder="Écrire un commentaire..." class="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#1C1C1B] text-sm text-gray-900 dark:text-white focus:outline-none">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Publier</button>
-            </form>
+        <button @click="showComments = !showComments" class="flex-1 py-2 text-gray-600 font-semibold hover:bg-gray-100 rounded-lg">💬 Commenter</button>
+    </div>
+    <div x-show="showComments" x-transition class="bg-gray-50 dark:bg-black/20 border-t border-gray-100 dark:border-gray-800 p-4 space-y-4">
+        <form action="{{ route('comments.store', $post) }}" method="POST" class="flex gap-2">
+            @csrf
+            <input type="text" name="content" placeholder="Écrire un commentaire..." class="flex-1 rounded-full px-4 py-2 bg-gray-100 dark:bg-gray-800 text-sm focus:ring-1 focus:ring-indigo-500">
+            <button class="bg-indigo-600 text-white px-4 rounded-full">Envoyer</button>
+        </form>
+        <div class="space-y-3">
             @foreach($post->comments as $comment)
-                <div class="text-sm text-gray-700 dark:text-gray-300"><strong>{{ $comment->user->name }}</strong> :{{ $comment->content }}</div>
+                <div class="flex gap-2">
+                    <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">{{ strtoupper(substr($comment->user->name, 0, 1)) }}</div>
+                    <div class="bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-2">
+                        <p class="text-xs font-semibold">{{ $comment->user->name }}</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $comment->content }}</p>
+                    </div>
+                </div>
             @endforeach
         </div>
-        @if($post->user_id === auth()->id())
-            <form action="{{ route('posts.destroy', $post) }}" method="POST" class="relative group" x-data="{ confirmDelete: false }">
-                @csrf
-                @method('DELETE')
-                <button type="button" @click="confirmDelete = !confirmDelete" class="text-gray-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-            </form>
-        @endif
     </div>
 </div>
