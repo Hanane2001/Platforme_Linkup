@@ -156,7 +156,7 @@
                                 </div>
                                 <button @click="showComments = !showComments" class="flex-1 py-2 text-gray-600 font-semibold hover:bg-gray-100 rounded-lg">💬 Commenter</button>
                             </div>
-                            <div x-show="showComments" x-transition class="bg-gray-50 dark:bg-black/20 border-t border-gray-100 dark:border-gray-800 p-4 space-y-4">
+                            <div x-show="showComments" x-transition class="text-white bg-gray-50 dark:bg-black/20 border-t border-gray-100 dark:border-gray-800 p-4 space-y-4">
                                 <form action="{{ route('comments.store', $post) }}" method="POST" class="flex gap-2">
                                     @csrf
                                     <input type="text" name="content" placeholder="Écrire un commentaire..." class="flex-1 rounded-full px-4 py-2 bg-gray-100 dark:bg-gray-800 text-sm focus:ring-1 focus:ring-indigo-500" required>
