@@ -20,8 +20,10 @@ class DashboardController extends Controller
                 })
                 ->get();
         }
-        // $posts = Post::latest()->get();
+        $friendIds = auth()->user()->friendsRelation()->pluck('id');
+        $friendIds->push(auth()->id());
         $posts = Post::with(['user', 'likes', 'comments.user'])
+            ->whereIn('user_id', $friendIds)
             ->latest()
             ->get();
         return view('dashboard', compact('users','posts'));
